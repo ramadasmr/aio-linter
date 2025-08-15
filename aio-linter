@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -e
+
+print_help_banner(){
+cat <<EOF
+Usage: aio-linter [directory|filename] <options>
+
+Options:
+  --dry                         	Dry run, to show commands without executing
+  -h, --help                            Show Help
+
+EOF
+}
+
+found_wrong_command_args(){
+    print_help_banner
+    exit 2
+}
+
+init_variables(){
+    SEARCHLIST=()
+    DRYRUN=""
+}
+
+check_arg_is_valid_file(){
+if [ -e "$1" ]; then
+	echo "[`date`] running aio-linter on \"$1\" "
+    SEARCH_LIST+=($1)
+else
+	echo "ERROR: Provided path \"$1\" is invalid"
+    echo ""
+fi
+}
+
+parse_args(){
+if [[ "$#" -gt 0 ]]; then
+    while true
+    do
+    if [ -n "$1" ]; then
+        case $1 in
+        --dry)
+            DRYRUN=YES
+            shift
+            ;;
+        -h|--help)
+            print_help_banner
+            exit 0
+            ;;
+        *)
+            check_arg_is_valid_file $1
+	    shift
+            ;;
+        esac
+    else
+        break
+    fi
+    done
+else
+    found_wrong_command_args
+fi
+}
+
+find_files_to_lint(){
+    test
+}
+
+perform_lint(){
+    test
+}
+
+print_lint_outcome(){
+    test
+}
+
+
+
+run_linter(){
+if [ ${#SEARCH_LIST[@]} -ne 0 ]; then
+    for SEARCHFILE in SEARCH_LIST
+    do
+        find_files_to_lint
+        perform_lint
+        print_lint_outcome
+    done
+else
+    echo "No Action to perform, Provide valid file(s)/directory "
+fi
+}
+
+#
+# main
+#
+
+init_variables
+parse_args $@
+run_linter
