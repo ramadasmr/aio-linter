@@ -49,7 +49,7 @@ if [[ "$#" -gt 0 ]]; then
             ;;
         *)
             check_arg_is_valid_file $1
-	    shift
+	        shift
             ;;
         esac
     else
@@ -89,6 +89,19 @@ print_lint_outcome(){
     echo -n ""
 }
 
+check_command_exists(){
+    COMMAND_NOT_FOUND=()
+    if [ -z "$1" ]; then
+        for COMMAND in ${LINT_COMMAND_LIST[@]}
+        do
+            if [[ ! $(command -v $COMMAND) ]]; then
+                COMMAND_NOT_FOUND+=($COMMAND)
+            fi
+        done
+        [[ ${#COMMAND_NOT_FOUND[@]} -eq 0 ]] || echo "Missing Commands, please install : ${COMMAND_NOT_FOUND[@]}"
+        [[ ${#COMMAND_NOT_FOUND[@]} -eq 0 ]] || exit 1
+    fi
+}
 
 
 run_linter(){
@@ -110,6 +123,8 @@ fi
 # main
 #
 
+LINT_COMMAND_LIST=(shellcheck pylint yamllint)
 init_variables
 parse_args $@
+check_command_exists
 run_linter
