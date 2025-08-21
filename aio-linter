@@ -18,14 +18,15 @@ found_wrong_command_args(){
 }
 
 init_variables(){
-    SEARCHLIST=()
+    SEARCH_LIST=()
+    LINT_LIST=()
     DRYRUN=""
 }
 
 check_arg_is_valid_file(){
 if [ -e "$1" ]; then
 	echo "[`date`] running aio-linter on \"$1\" "
-    SEARCH_LIST+=($1)
+    SEARCH_LIST+=("$1")
 else
 	echo "ERROR: Provided path \"$1\" is invalid"
     echo ""
@@ -61,29 +62,47 @@ fi
 }
 
 find_files_to_lint(){
-    test
+    for file in $(find $SEARCHFILE)
+    do
+    case $file in
+    *.sh)
+        [[ " ${LINT_LIST[@]} " =~ "SHELL" ]] || LINT_LIST+=("SHELL")
+        ;;
+    *.py)
+        [[ " ${LINT_LIST[@]} " =~ "PYTHON" ]] || LINT_LIST+=("PYTHON")
+        ;;
+    *.yaml|*.yml)
+        [[ " ${LINT_LIST[@]} " =~ "YAML" ]] || LINT_LIST+=("YAML")
+        ;;
+    esac
+    done
 }
 
 perform_lint(){
-    test
+    for LINT_TYPE in ${LINT_LIST[@]}
+    do
+        echo "LINTING -> $LINT_TYPE on $SEARCHFILE"
+    done
 }
 
 print_lint_outcome(){
-    test
+    echo -n ""
 }
 
 
 
 run_linter(){
 if [ ${#SEARCH_LIST[@]} -ne 0 ]; then
-    for SEARCHFILE in SEARCH_LIST
+    for SEARCHFILE in ${SEARCH_LIST[@]}
     do
+        SEARCHFILE=$(readlink -f $SEARCHFILE)
         find_files_to_lint
         perform_lint
         print_lint_outcome
+        LINT_LIST=()
     done
 else
-    echo "No Action to perform, Provide valid file(s)/directory "
+    echo "No Action to perform, Provide valid file(s)/directory"
 fi
 }
 
