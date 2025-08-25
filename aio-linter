@@ -82,6 +82,15 @@ perform_lint(){
     for LINT_TYPE in ${LINT_LIST[@]}
     do
         echo "LINTING -> $LINT_TYPE on $SEARCHFILE"
+        case $LINT_TYPE in
+        SHELL)
+        find $SEARCHFILE -type f -name "*.sh" -exec shellcheck {} + || continue
+        ;;
+        YAML)
+        find $SEARCHFILE -type f -name "*.yaml" -exec yamllint {} + || continue
+        find $SEARCHFILE -type f -name "*.yml" -exec yamllint {} + || continue
+        ;;
+        esac
     done
 }
 
