@@ -74,6 +74,9 @@ find_files_to_lint(){
     *.yaml|*.yml)
         [[ " ${LINT_LIST[@]} " =~ "YAML" ]] || LINT_LIST+=("YAML")
         ;;
+    *.json)
+        [[ " ${LINT_LIST[@]} " =~ "JSON" ]] || LINT_LIST+=("JSON")
+        ;;
     esac
     done
 }
@@ -89,6 +92,9 @@ perform_lint(){
         YAML)
         find $SEARCHFILE -type f -name "*.yaml" -exec yamllint {} + || continue
         find $SEARCHFILE -type f -name "*.yml" -exec yamllint {} + || continue
+        ;;
+        JSON)
+        find $SEARCHFILE -type f -name "*.json" -exec jsonlint {} + || continue
         ;;
         esac
     done
@@ -132,7 +138,7 @@ fi
 # main
 #
 
-LINT_COMMAND_LIST=(shellcheck pylint yamllint)
+LINT_COMMAND_LIST=(shellcheck pylint yamllint jsonlint)
 init_variables
 parse_args $@
 check_command_exists
