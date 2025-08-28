@@ -20,6 +20,7 @@ found_wrong_command_args(){
 init_variables(){
     SEARCH_LIST=()
     LINT_LIST=()
+    LIMITED_LINT_LIST=()
     DRYRUN=""
 }
 
@@ -47,6 +48,11 @@ if [[ "$#" -gt 0 ]]; then
             print_help_banner
             exit 0
             ;;
+        -l|--limit)
+            LIMIT_OPTS=$2
+            LIMITED_LINT_LIST=($(echo $LIMIT_OPTS | tr ',' ' '))
+            shift 2
+        ;;
         *)
             check_arg_is_valid_file $1
 	        shift
@@ -79,23 +85,56 @@ find_files_to_lint(){
         ;;
     esac
     done
+    if [ ${#LIMITED_LINT_LIST[@]} -ne 0 ]; then
+        TMP_LINT_LIST=()
+        for LIMIT_TYPE in ${LIMITED_LINT_LIST[@]}
+        do
+        case $LIMIT_TYPE in
+        sh|shell|bash)
+            if [[ " ${LINT_LIST[@]} " =~ "SHELL" ]]; then
+                [[ " ${TMP_LINT_LIST[@]} " =~ "SHELL" ]] || TMP_LINT_LIST+=("SHELL")
+            fi
+            ;;
+        py|python)
+            if [[ " ${LINT_LIST[@]} " =~ "PYTHON" ]]; then
+                [[ " ${TMP_LINT_LIST[@]} " =~ "PYTHON" ]] || TMP_LINT_LIST+=("PYTHON")
+            fi
+            ;;
+        yaml|yml)
+            if [[ " ${LINT_LIST[@]} " =~ "YAML" ]]; then
+                [[ " ${TMP_LINT_LIST[@]} " =~ "YAML" ]] || TMP_LINT_LIST+=("YAML")
+            fi
+            ;;
+        json)
+            if [[ " ${LINT_LIST[@]} " =~ "JSON" ]]; then
+                [[ " ${TMP_LINT_LIST[@]} " =~ "JSON" ]] || TMP_LINT_LIST+=("JSON")
+            fi
+            ;;
+        esac
+        done
+        LINT_LIST=(${TMP_LINT_LIST[@]})
+    fi
 }
 
 perform_lint(){
+    if [ ${#LINT_LIST[@]} -eq 0 ]; then
+        echo "NO FILE TYPE ${LIMIT_OPTS[@]} found in $SEARCHFILE"
+        return
+    fi
     for LINT_TYPE in ${LINT_LIST[@]}
     do
         echo "LINTING -> $LINT_TYPE on $SEARCHFILE"
         case $LINT_TYPE in
         SHELL)
-        find $SEARCHFILE -type f -name "*.sh" -exec shellcheck {} + || continue
-        ;;
+            find $SEARCHFILE -type f -name "*.sh" -exec shellcheck {} + || continue
+            ;;
         YAML)
-        find $SEARCHFILE -type f -name "*.yaml" -exec yamllint {} + || continue
-        find $SEARCHFILE -type f -name "*.yml" -exec yamllint {} + || continue
-        ;;
+            find $SEARCHFILE -type f -name "*.yaml" -exec yamllint {} + || continue
+            find $SEARCHFILE -type f -name "*.yml" -exec yamllint {} + || continue
+            ;;
         JSON)
-        find $SEARCHFILE -type f -name "*.json" -exec jsonlint {} + || continue
-        ;;
+            find $SEARCHFILE -type f -name "*.json" -exec jsonlint {} + || continue
+            ;;
         esac
     done
 }
