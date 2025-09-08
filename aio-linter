@@ -124,23 +124,29 @@ perform_lint(){
     for LINT_TYPE in ${LINT_LIST[@]}
     do
         echo "LINTING -> $LINT_TYPE on $SEARCHFILE"
+        if [ "$DRYRUN" == "YES" ]; then
+            echo "aio-linter: DRY RUN chosen, skipping command execution.."
+            continue
+        fi
         case $LINT_TYPE in
         SHELL)
-            find $SEARCHFILE -type f -name "*.sh" -exec shellcheck {} + || continue
+            find $SEARCHFILE -type f -name "*.sh" -exec shellcheck {} + >> $RCOUTPUT || continue
             ;;
         YAML)
-            find $SEARCHFILE -type f -name "*.yaml" -exec yamllint {} + || continue
-            find $SEARCHFILE -type f -name "*.yml" -exec yamllint {} + || continue
+            find $SEARCHFILE -type f -name "*.yaml" -exec yamllint {} + >> $RCOUTPUT || continue
+            find $SEARCHFILE -type f -name "*.yml" -exec yamllint {} + >> $RCOUTPUT || continue
             ;;
         JSON)
-            find $SEARCHFILE -type f -name "*.json" -exec jsonlint {} + || continue
+            find $SEARCHFILE -type f -name "*.json" -exec jsonlint {} + >> $RCOUTPUT || continue
             ;;
         esac
     done
 }
 
 print_lint_outcome(){
-    echo -n ""
+    if [ "$DRYRUN" != "YES" ]; then
+        cat $RCOUTPUT
+    fi
 }
 
 check_command_exists(){
@@ -159,6 +165,7 @@ check_command_exists(){
 
 
 run_linter(){
+RCOUTPUT=/tmp/aio-linter-${RANDOM}.out
 if [ ${#SEARCH_LIST[@]} -ne 0 ]; then
     for SEARCHFILE in ${SEARCH_LIST[@]}
     do
