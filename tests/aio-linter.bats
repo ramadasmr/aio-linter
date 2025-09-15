@@ -7,3 +7,9 @@ setup() {
     run aio-linter
 }
 
+@test "[TEST] prints help message with -h" {
+    run aio-linter -h
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage:"* ]]
+}
+
