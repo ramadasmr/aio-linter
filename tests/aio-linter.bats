@@ -13,3 +13,8 @@ setup() {
     [[ "$output" == *"Usage:"* ]]
 }
 
+@test "[TEST] fails with invalid arg" {
+    run aio-linter --invalid
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"Invalid option:"* ]]
+}
