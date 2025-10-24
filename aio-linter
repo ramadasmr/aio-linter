@@ -139,6 +139,9 @@ perform_lint(){
         JSON)
             find $SEARCHFILE -type f -name "*.json" -exec jsonlint {} + >> $RCOUTPUT || continue
             ;;
+        MARKDOWN)
+            find $SEARCHFILE -type f -name "*.md" -exec markdownlint-cli2 {} + >> $RCOUTPUT || continue
+            ;;
         esac
     done
 }
@@ -184,7 +187,7 @@ fi
 # main
 #
 
-LINT_COMMAND_LIST=(shellcheck pylint yamllint jsonlint)
+LINT_COMMAND_LIST=(shellcheck pylint yamllint jsonlint markdownlint-cli2)
 init_variables
 parse_args $@
 check_command_exists
