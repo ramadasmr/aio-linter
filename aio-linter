@@ -83,6 +83,9 @@ find_files_to_lint(){
     *.json)
         [[ " ${LINT_LIST[@]} " =~ "JSON" ]] || LINT_LIST+=("JSON")
         ;;
+    *.md)
+        [[ " ${LINT_LIST[@]} " =~ "MARKDOWN" ]] || LINT_LIST+=("MARKDOWN")
+        ;;
     esac
     done
     if [ ${#LIMITED_LINT_LIST[@]} -ne 0 ]; then
@@ -108,6 +111,11 @@ find_files_to_lint(){
         json)
             if [[ " ${LINT_LIST[@]} " =~ "JSON" ]]; then
                 [[ " ${TMP_LINT_LIST[@]} " =~ "JSON" ]] || TMP_LINT_LIST+=("JSON")
+            fi
+            ;;
+        md|markdown)
+            if [[ " ${LINT_LIST[@]} " =~ "MARKDOWN" ]]; then
+                [[ " ${TMP_LINT_LIST[@]} " =~ "MARKDOWN" ]] || TMP_LINT_LIST+=("MARKDOWN")
             fi
             ;;
         esac
